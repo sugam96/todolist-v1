@@ -6,8 +6,10 @@ const bodyParser = require("body-parser");
 
 const app = express();
 var items = [];
-app.use(bodyParser.urlencoded({extended:true}))
+var workItems = [];
+app.use(bodyParser.urlencoded({ extended: true }));
 app.set('view engine', 'ejs');
+app.use(express.static("public"));
 
 app.get("/", function (req, res) {
     var today = new Date();
@@ -17,14 +19,27 @@ app.get("/", function (req, res) {
         day: "numeric"
     }
     var day = today.toLocaleDateString("en-US", options);
-
-    res.render("list", { dayDateMonth: day, items: items });
+    res.render("list", { listTitle: day, items: items });
 });
 
 app.post("/", function (req, res) {
-    var item = req.body.newItem;
-    items.push(item);
-    res.redirect("/");
+    let item = req.body.newItem;
+    if (req.body.list === "Work List") {
+        workItems.push(item);
+        res.redirect("/work");
+    }
+    else {
+        items.push(item);
+        res.redirect("/");
+    }
+});
+
+app.get("/work", function (req, res) {
+    res.render("list", { listTitle: "Work List", items: workItems });
+});
+
+app.get("/about", function(req, res){
+    res.render("about");
 })
 
 app.listen(3000, function () {
